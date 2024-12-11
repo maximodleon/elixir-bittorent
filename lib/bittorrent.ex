@@ -22,7 +22,10 @@ defmodule Bencode do
         binary_data = :binary.bin_to_list(encoded_value)
         case Enum.find_index(binary_data, fn char -> char == 58 end) do
           nil ->
-            IO.puts("The ':' character is not found in the binary")
+            binary_data
+             |> List.delete_at(0)
+             |> List.delete_at(length(binary_data) - 2)
+             |> List.to_integer
           index ->
             rest = Enum.slice(binary_data, index+1..-1)
             List.to_string(rest)
