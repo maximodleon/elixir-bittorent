@@ -24,6 +24,11 @@ defmodule Bencode do
       end
     end
 
+    def decode_next("l" <> rest) when byte_size(rest) > 2 do
+    decode_list([], rest)
+    end
+
+
     def decode_next(encoded_value) when is_binary(encoded_value) do
       [length, str] = String.split(encoded_value, ":")
       String.split_at(str, String.to_integer(length))
@@ -31,7 +36,7 @@ defmodule Bencode do
 
     def decode_list(decoded_items, rest) do
        # end of the list
-      if String.first(rest, "e") do
+      if String.first(rest) ==  "e" do
        {Enum.reverse(decoded_items), String.slice(rest, 1, byte_size(rest) - 1)}
       else
        {item, rest } = decode_next(rest)
@@ -40,17 +45,18 @@ defmodule Bencode do
     end
 
     def decode(encoded_value) when is_binary(encoded_value) do
-        binary_data = :binary.bin_to_list(encoded_value)
-        case Enum.find_index(binary_data, fn char -> char == 58 end) do
-          nil ->
-            binary_data
-             |> List.delete_at(0)
-             |> List.delete_at(length(binary_data) - 2)
-             |> List.to_integer
-          index ->
-            rest = Enum.slice(binary_data, index+1..-1)
-            List.to_string(rest)
-        end
+    # binary_data = :binary.bin_to_list(encoded_value)
+        decode_next(encoded_value)
+    # case Enum.find_index(binary_data, fn char -> char == 58 end) do
+    #      nil ->
+      #        binary_data
+      #       |> List.delete_at(0)
+      #       |> List.delete_at(length(binary_data) - 2)
+    #       |> List.to_integer
+    #      index ->
+    #        rest = Enum.slice(binary_data, index+1..-1)
+    #        List.to_string(rest)
+    #    end
       end
 
     def decode(_), do: "Invalid encoded value: not binary"
