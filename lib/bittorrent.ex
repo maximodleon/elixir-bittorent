@@ -24,8 +24,19 @@ defmodule Bencode do
       end
     end
 
-    def decode_list(items, rest) do
-      decode_next(rest)
+    def decode_next(encoded_value) when is_binary(encoded_value) do
+      [length, str] = String.split(encoded_value, ":")
+      String.split_at(str, String.to_integer(length))
+    end
+
+    def decode_list(decoded_items, rest) do
+       # end of the list
+      if String.first(rest, "e") do
+       {Enum.reverse(decoded_items), String.slice(rest, 1, byte_size(rest) - 1)}
+      else
+       {item, rest } = decode_next(rest)
+       decode_list([item | decoded_items], rest)
+      end
     end
 
     def decode(encoded_value) when is_binary(encoded_value) do
