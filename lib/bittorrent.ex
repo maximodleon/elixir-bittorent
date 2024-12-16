@@ -18,6 +18,16 @@ defmodule Bittorrent.CLI do
 end
 
 defmodule Bencode do
+    def decode_next("i" <> rest) when byte_size(rest) > 2 do
+      case String.split(rest, "e", parts: 2) do
+        [numeric_str, rest] -> { String.to_integer(numeric_str), rest }
+      end
+    end
+
+    def decode_list(items, rest) do
+      decode_next(rest)
+    end
+
     def decode(encoded_value) when is_binary(encoded_value) do
         binary_data = :binary.bin_to_list(encoded_value)
         case Enum.find_index(binary_data, fn char -> char == 58 end) do
