@@ -70,7 +70,7 @@ defmodule Bencode do
 
     def get_file_info(filename) do
       case File.read(filename) do
-        {:ok, content} -> decode(IO.iodata_to_binary(content))
+        {:ok, content} -> decode(content)
         {:error, reason } -> IO.puts(reason)
       end
     end
