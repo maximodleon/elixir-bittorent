@@ -7,6 +7,9 @@ defmodule Bittorrent.CLI do
 
               decoded_str = Bencode.decode(encoded_str)
               IO.puts(Jason.encode!(decoded_str))
+          ["info" | filename] ->
+             info = Bencode.get_file_info(filename)
+             IO.puts(info)
           [command | _] ->
               IO.puts("Unknown command: #{command}")
               System.halt(1)
@@ -50,7 +53,7 @@ defmodule Bencode do
     def decode_dictionary(decodes_keys, encoded_string) do
       # end of the list
       if String.first(encoded_string) ==  "e" do
-      { decodes_keys, String.slice(encoded_string, 1, byte_size(encoded_string) - 1)}
+       { decodes_keys, String.slice(encoded_string, 1, byte_size(encoded_string) - 1)}
       else
        { key, rest } = decode_next(encoded_string)
        { val, rest} = decode_next(rest)
@@ -64,4 +67,11 @@ defmodule Bencode do
     end
 
     def decode(_), do: "Invalid encoded value: not binary"
+
+    def get_file_info(filename) do
+      case File.read(filename) do
+        {:ok, content} -> decode(IO.iodata_to_binary(content))
+        {:error, reason } -> IO.puts(reason)
+      end
+    end
 end
