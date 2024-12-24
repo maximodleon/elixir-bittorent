@@ -9,7 +9,8 @@ defmodule Bittorrent.CLI do
               IO.puts(Jason.encode!(decoded_str))
           ["info" | filename] ->
              info = Bencode.get_file_info(filename)
-             IO.puts(info)
+             IO.puts("Tracker URL: #{info["announce"]}")
+             IO.puts("Length: #{info["info"]["length"]}")
           [command | _] ->
               IO.puts("Unknown command: #{command}")
               System.halt(1)
@@ -35,7 +36,7 @@ defmodule Bencode do
      decode_dictionary(%{}, rest)
     end
 
-    def decode_next(encoded_value) when is_binary(encoded_value) do
+    def decode_next(encoded_value) when is_binary(encoded_value)  do
       [length, str] = String.split(encoded_value, ":", parts: 2)
       String.split_at(str, String.to_integer(length))
     end
@@ -57,6 +58,7 @@ defmodule Bencode do
       else
        { key, rest } = decode_next(encoded_string)
        { val, rest} = decode_next(rest)
+      # IO.puts("a #{key}:#{val}")
        decode_dictionary(Map.put(decodes_keys, key, val), rest)
       end
     end
