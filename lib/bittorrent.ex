@@ -36,10 +36,11 @@ defmodule Bencode do
      decode_dictionary(%{}, rest)
     end
 
-    def decode_next(encoded_value) when is_binary(encoded_value)  do
+    def decode_next(encoded_value) when is_binary(encoded_value) do
       [length, str] = String.split(encoded_value, ":", parts: 2)
       String.split_at(str, String.to_integer(length))
     end
+
 
     def decode_list(decoded_items, rest) do
        # end of the list
@@ -51,6 +52,10 @@ defmodule Bencode do
       end
     end
 
+    def decode_dictionary(decoded_keys, encoded_string) when byte_size(encoded_string) == 0 do
+     { decoded_keys, "e" }
+    end
+
     def decode_dictionary(decodes_keys, encoded_string) do
       # end of the list
       if String.first(encoded_string) ==  "e" do
@@ -58,7 +63,6 @@ defmodule Bencode do
       else
        { key, rest } = decode_next(encoded_string)
        { val, rest} = decode_next(rest)
-      # IO.puts("a #{key}:#{val}")
        decode_dictionary(Map.put(decodes_keys, key, val), rest)
       end
     end
